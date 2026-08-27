@@ -1,13 +1,34 @@
-import { useState } from "react";
-import type { ChangeEvent, FormEvent } from "react";
+import { useState, useEffect } from "react";
+import { v4 as uuidv4 } from "uuid";
+import type { ChangeEvent, Dispatch, FormEvent } from "react";
 import { categories } from "../data/categories";
 import type { Activity } from "../types";
+import type {
+  ActivityActions,
+  ActivityState,
+} from "../reducers/activity-reducer";
 
-const Form = () => {
+type FormProps = {
+  dispatch: Dispatch<ActivityActions>;
+  state: ActivityState;
+};
+
+const initialState: Activity = {
+  id: uuidv4(),
+  category: 1,
+  name: "",
+  calories: 0,
+};
+
+const Form = ({ dispatch, state }: FormProps) => {
   const [activity, setActivity] = useState<Activity>({
-    category: 0,
-    name: "",
-    calories: 0,
+    ...initialState,
+  });
+
+  useEffect(() => {
+    if (state.activeId) {
+      console.log("Ya tenemos el ID");
+    }
   });
 
   const handleChange = (
@@ -30,7 +51,12 @@ const Form = () => {
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    console.log("Submit...");
+    dispatch({ type: "save-activity", payload: { newActivity: activity } });
+
+    setActivity({
+      ...initialState,
+      id: uuidv4(),
+    });
   };
 
   return (
@@ -40,7 +66,7 @@ const Form = () => {
     >
       <div className="grid grid-cols-1 gap-3">
         <label htmlFor="category" className="font-bold">
-          Categoria:
+          Categoriazo;
         </label>
         <select
           className="border border-slate-300 p-2 rounded-lg w-full bg-white"
