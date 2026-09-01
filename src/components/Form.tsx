@@ -27,15 +27,24 @@ const Form = ({ dispatch, state }: FormProps) => {
 
   useEffect(() => {
     if (state.activeId) {
-      console.log("Ya tenemos el ID");
+      const selectedActivity = state.activities.find(
+        (a) => a.id === state.activeId,
+      );
+      // Solo se actualzia si la actividad es diferente a la actual.
+      if (selectedActivity && selectedActivity.id !== activity.id) {
+        setActivity(selectedActivity);
+      }
     }
-  });
+  }, [state.activeId, state.activities, activity.id]);
 
   const handleChange = (
     e: ChangeEvent<HTMLSelectElement | HTMLInputElement>,
   ) => {
     const { id, value, type } = e.target;
-    const parsedValue = type === "number" ? +value : value;
+    /// converter de tipos de texto
+    const numericFields = ["calories", "category"];
+    const parsedValue =
+      type === "number" || numericFields.includes(id) ? +value : value;
 
     setActivity({
       ...activity,
@@ -51,7 +60,15 @@ const Form = ({ dispatch, state }: FormProps) => {
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    dispatch({ type: "save-activity", payload: { newActivity: activity } });
+    dispatch({
+      type: "save-activity",
+      payload: {
+        newActivity: {
+          ...activity,
+          calories: parseInt(activity.calories.toString()),
+        },
+      },
+    });
 
     setActivity({
       ...initialState,
@@ -66,7 +83,7 @@ const Form = ({ dispatch, state }: FormProps) => {
     >
       <div className="grid grid-cols-1 gap-3">
         <label htmlFor="category" className="font-bold">
-          Categoriazo;
+          Categoria:
         </label>
         <select
           className="border border-slate-300 p-2 rounded-lg w-full bg-white"
